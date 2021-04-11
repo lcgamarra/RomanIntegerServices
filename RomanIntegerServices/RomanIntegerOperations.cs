@@ -6,6 +6,13 @@ using System.Runtime.CompilerServices;
 
 namespace RomanIntegerServices
 {
+    /*
+     * Important Rules to forming roman numbers
+     * 1. No digit is repeated in succession more the thrice. Apply to I, X, C and M
+     * 2. The digits V, L and D can't be repeated
+     * 3. V is never written to the left of X
+     */
+    
     public enum RomanDigit
     {
         I = 1,
@@ -22,38 +29,56 @@ namespace RomanIntegerServices
         private const int MAX_ROMAN = 3999;
         private const int MIN_ROMAN = 1;
         private static string acceptableCharacters = "IVXLCDM";
-        private static String[] romanStrings = new String[] { "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" };
-        private static int[] integersValues = new int[] { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
+        private static String[] romanStrings = { "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" };
+        private static int[] integersValues = { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
         public static int RomanToInteger(string romanStringParameter)
         {
             var roman = romanStringParameter.ToUpper().Trim();
-
+            
             if (!roman.All(c => acceptableCharacters.Contains(c)))
             {
+                // Return an invalid value if there is any non accepted character to convert
+                return 0;
+            }
+            else if (roman.Contains("IIII") || roman.Contains("XXXX") || roman.Contains("CCCC") ||
+                     roman.Contains("MMMM"))
+            {
+                // Return an invalid value if the first rule doesn't complain
+                return 0;
+            }
+            else if (roman.Count(c => c == 'V') > 1 || roman.Count(c => c == 'L') > 1 || roman.Count(c => c == 'D') > 1)
+            {
+                // Return an invalid value if the second rule doesn't complain
+                return 0;
+            }
+            else if (roman.Contains("VX"))
+            {
+                // Return and invalid value if the third rule doesn't complain
                 return 0;
             }
             
-            var ptr = 0;
+            
+            var romanStringIndex = 0;
             var values = new List<int>();
-            while (ptr < roman.Length)
+            while (romanStringIndex < roman.Length)
             {
-                var numeral = roman[ptr];
+                var numeral = roman[romanStringIndex];
                 var digit = (int)Enum.Parse(typeof(RomanDigit), numeral.ToString());
                 
-                if (ptr < roman.Length - 1)
+                if (romanStringIndex < roman.Length - 1)
                 {
-                    var nextNumeral = roman[ptr + 1];
+                    var nextNumeral = roman[romanStringIndex + 1];
                     var nextDigit = (int)Enum.Parse(typeof(RomanDigit), nextNumeral.ToString());
 
                     if (nextDigit > digit)
                     {
                         digit = nextDigit - digit;
-                        ptr++;
+                        romanStringIndex++;
                     }
                 }
 
                 values.Add(digit);
-                ptr++;
+                romanStringIndex++;
             }
 
             var total = values.Sum();
